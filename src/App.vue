@@ -7,10 +7,11 @@
 </template>
 
 <script>
-import axios from "axios";
 import Todos from "./components/Todos";
 import Header from "./components/Header";
 import AddTodo from "./components/AddTodo";
+
+import api from "./services/api";
 
 export default {
   name: "app",
@@ -25,15 +26,24 @@ export default {
     };
   },
   methods: {
-    deleteTodo(id) {
+    async deleteTodo(id) {
+      await api.delete(`todos/${id}`);
       this.todos = this.todos.filter(todo => todo.id !== id);
     },
-    addTodo(newTodo) {
-      this.todos = [...this.todos, newTodo];
-    },
-    created() {
-      axios.get("");
+    async addTodo(newTodo) {
+      const { title, completed } = newTodo;
+
+      const response = await api.post("todos", {
+        title,
+        completed
+      });
+
+      this.todos = [...this.todos, response.data];
     }
+  },
+  async created() {
+    const response = await api.get("todos?_limit=5");
+    this.todos = response.data;
   }
 };
 </script>
